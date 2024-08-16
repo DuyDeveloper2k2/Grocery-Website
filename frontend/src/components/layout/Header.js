@@ -1,0 +1,110 @@
+import React, { Fragment } from "react";
+import { Route, Link } from "react-router-dom";
+
+import { useDispatch, useSelector } from "react-redux";
+import { useAlert } from "react-alert";
+import { logout } from "../../actions/userActions";
+
+import Search from "./Search";
+
+import "../../App.css";
+
+import img from "../../assets/images/Logo.png";
+
+const Header = () => {
+  const alert = useAlert();
+  const dispatch = useDispatch();
+
+  const { user, loading } = useSelector((state) => state.auth);
+  const { cartItems } = useSelector((state) => state.cart);
+
+  const logoutHandler = () => {
+    dispatch(logout());
+    alert.success("Đăng xuất thành công");
+  };
+
+  return (
+    <Fragment>
+      <nav className="navbar row">
+        <div className="col-12 col-md-3">
+          <div className="navbar-brand">
+            <Link to="/">
+              <img src={img} width={100} height={100} alt="" />
+            </Link>
+          </div>
+        </div>
+
+        <div className="col-12 col-md-6 mt-2 mt-md-0">
+          <Route render={({ history }) => <Search history={history} />} />
+        </div>
+
+        <div className="col-12 col-md-3 mt-4 mt-md-0 text-center">
+          {user && user.role === "admin" ? (
+            <p></p>
+          ) : (
+            <Link to="/cart" style={{ textDecoration: "none" }}>
+              <span id="cart" className="ml-3">
+                Giỏ hàng
+              </span>
+              <span className="ml-1" id="cart_count">
+                <i class="bi bi-cart4"></i>
+                {cartItems.length}
+              </span>
+            </Link>
+          )}
+
+          {user ? (
+            <div className="ml-4 dropdown d-inline">
+              <Link
+                to="#!"
+                className="btn dropdown-toggle text-white mr-4"
+                type="button"
+                id="dropDownMenuButton"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+              >
+                <span>{user && user.name}</span>
+              </Link>
+
+              <div
+                className="dropdown-menu mt-2"
+                aria-labelledby="dropDownMenuButton"
+              >
+                {user && user.role === "admin" && (
+                  <Link className="dropdown-item" to="/admin/products">
+                    Trang quản trị
+                  </Link>
+                )}
+                {user && user.role !== "admin" && (
+                  <Link className="dropdown-item" to="/orders/me">
+                    Đơn đặt hàng
+                  </Link>
+                )}
+
+                <Link className="dropdown-item" to="/me">
+                  Thông tin cá nhân
+                </Link>
+                <Link
+                  className="dropdown-item text-danger"
+                  to="/"
+                  onClick={logoutHandler}
+                >
+                  Đăng xuất
+                </Link>
+              </div>
+            </div>
+          ) : (
+            !loading && (
+              <Link to="/login" className="btn ml-4" id="login_btn">
+                Đăng nhập
+              </Link>
+            )
+          )}
+        </div>
+      </nav>
+    </Fragment>
+  );
+};
+
+export default Header;
